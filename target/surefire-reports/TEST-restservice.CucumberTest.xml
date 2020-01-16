@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite tests="4" failures="0" name="restservice.CucumberTest" time="0.04" errors="0" skipped="4">
+<testsuite tests="1" failures="0" name="restservice.CucumberTest" time="1.413" errors="0" skipped="0">
   <properties>
     <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
     <property name="java.vm.version" value="10.0.2+13"/>
@@ -65,19 +65,5 @@
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase classname="Test the rest service" name="Creating a customer and adding him to the system" time="0.009">
-    <skipped/>
-    <system-err>Jan 16, 2020 3:14:31 PM cucumber.runtime.java.ObjectFactoryLoader loadSingleObjectFactory
-INFO: Loading ObjectFactory via service loader: io.cucumber.picocontainer.PicoFactory
-</system-err>
-  </testcase>
-  <testcase classname="Test the rest service" name="Creating a customer and adding him to the system" time="0.009">
-    <skipped/>
-  </testcase>
-  <testcase classname="Test the rest service" name="Creating a customer and adding him to the system" time="0.01">
-    <skipped/>
-  </testcase>
-  <testcase classname="Test the rest service" name="Creating a customer and adding him to the system" time="0.012">
-    <skipped/>
-  </testcase>
+  <testcase classname="Test the rest service" name="Creating a customer and adding him to the system" time="1.413"/>
 </testsuite>
