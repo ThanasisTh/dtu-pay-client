@@ -127,6 +127,17 @@ public class RestServicePaySteps {
 
     }
 
+    @Given("he doesn't have tokens")
+    public void heDoesnTHaveTokens() {
+
+    }
+
+    @Then("the endpoint api\\/pay will return false")
+    public void theEndpointApiPayWillReturnFalse() {
+       Assert.assertFalse(paymentSuccess);
+    }
+
+
     @After
     public void deleteFromBank() throws Exception{
         bank.retireAccount(customer.getAccount());
