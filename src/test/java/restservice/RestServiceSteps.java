@@ -1,24 +1,24 @@
 package restservice;
 
-import dtu.DtuPayMerchantRepresentation;
-import dtu.DtuPayUserRepresentation;
-import dtu.PaymentRequest;
-import dtu.TokenRequest;
+
+import dtu.ws.fastmoney.BankService;
+import rest.DtuPayMerchantRepresentation;
+import rest.DtuPayUserRepresentation;
+import rest.PaymentRequest;
+import rest.TokenRequest;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
-import io.cucumber.java.Before;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 
-public class RestServiceSteps {
+public class RestServiceSteps {  // This is not currently used because RestServicePaySteps covers all the cases
 
     WebTarget baseUrl;
     String response;
@@ -29,6 +29,7 @@ public class RestServiceSteps {
     String UuidNumber;
     boolean booleanResponse;
     TokenRequest tokenRequest;
+    BankService bankService;
 
     public RestServiceSteps() {
         Client client = ClientBuilder.newClient();
@@ -62,6 +63,7 @@ public class RestServiceSteps {
     public void weGetAConfirmationThatTheCustomerWasRegistered() {
 
     }
+
 
     @Given("there is a merchant in the bank with credentials {string} with uuid number {string} and account id {string}")
     public void thereIsAMerchantInTheBankWithCredentialsWithUuidNumberAndAccountId(String name, String uuid, String account) {
@@ -106,13 +108,6 @@ public class RestServiceSteps {
     public void weGetAConfirmationThatTheSystemGaveHimTokens() {
         Assert.assertTrue(booleanResponse);
     }
-
-//    @Before
-//    public void test() {
-//        String accountNr = baseUrl.path("get/account").queryParam("id", "1234").request().get(String.class);
-//        Assert.assertEquals("51a5837a-322b-4acd-a4b4-8318d032ea8a", accountNr);
-//
-//    }
 
 
 }

@@ -1,10 +1,10 @@
-package dtu;
+package rest;
 
 
 public class PaymentRequest {
 	private int amount;
 	private String merchantUuid;
-	private String token;
+
 	private String description;
 
 	public String getCustomerCpr() {
@@ -29,12 +29,7 @@ public class PaymentRequest {
 	public void setMerchantUuid(String merchantUuid) {
 		this.merchantUuid = merchantUuid;
 	}
-	public String getToken() {
-		return token;
-	}
-	public void setToken(String token) {
-		this.token = token;
-	}
+
 	public String getDescription() {
 		return description;
 	}
