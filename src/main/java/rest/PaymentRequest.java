@@ -1,11 +1,24 @@
 package rest;
 
 
+import java.util.UUID;
+
 public class PaymentRequest {
+
 	private int amount;
 	private String merchantUuid;
-
 	private String description;
+	private UUID uuid;
+
+	public UUID getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(UUID uuid) {
+		this.uuid = uuid;
+	}
+
+
 
 	public String getCustomerCpr() {
 		return customerCpr;

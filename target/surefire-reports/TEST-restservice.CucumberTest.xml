@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite tests="2" failures="1" name="restservice.CucumberTest" time="4.663" errors="0" skipped="0">
+<testsuite tests="1" failures="0" name="restservice.CucumberTest" time="4.927" errors="1" skipped="0">
   <properties>
     <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
     <property name="java.vm.version" value="10.0.2+13"/>
@@ -65,15 +65,22 @@
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase classname="Test the rest service" name="A customer tries to do a payment" time="4.326"/>
-  <testcase classname="Test the rest service" name="A customer tries to do a payment but doesnt have tokens" time="0.337">
-    <failure type="java.lang.AssertionError">java.lang.AssertionError
-	at org.junit.Assert.fail(Assert.java:86)
-	at org.junit.Assert.assertTrue(Assert.java:41)
-	at org.junit.Assert.assertFalse(Assert.java:64)
-	at org.junit.Assert.assertFalse(Assert.java:74)
-	at restservice.RestServicePaySteps.theEndpointApiPayWillReturnFalse(RestServicePaySteps.java:137)
-	at ✽.the endpoint api/pay will return false(file:features/rest.feature:39)
-</failure>
+  <testcase classname="Test the rest service" name="A customer tries to do a payment" time="4.927">
+    <error message="java.base/java.lang.String cannot be cast to java.base/java.util.UUID" type="java.lang.ClassCastException">java.lang.ClassCastException: java.base/java.lang.String cannot be cast to java.base/java.util.UUID
+	at rest.DtuPayUserRepresentation.StringToken(DtuPayUserRepresentation.java:55)
+	at restservice.RestServicePaySteps.theCustomerTriesToPerformAPaymentWithTheAmountOf(RestServicePaySteps.java:116)
+	at ✽.the customer tries to perform a payment with the amount of 50(file:features/rest.feature:28)
+</error>
+    <system-err>Jan 17, 2020 4:59:59 PM cucumber.runtime.java.ObjectFactoryLoader loadSingleObjectFactory
+INFO: Loading ObjectFactory via service loader: io.cucumber.picocontainer.PicoFactory
+Jan 17, 2020 5:00:00 PM javax.xml.soap.FactoryFinder find
+WARNING: Using deprecated META-INF/services mechanism with non-standard property: javax.xml.soap.MetaFactory. Property javax.xml.soap.SAAJMetaFactory should be used instead.
+Jan 17, 2020 5:00:00 PM javax.xml.soap.FactoryFinder find
+WARNING: Using deprecated META-INF/services mechanism with non-standard property: javax.xml.soap.MetaFactory. Property javax.xml.soap.SAAJMetaFactory should be used instead.
+Jan 17, 2020 5:00:00 PM javax.xml.soap.FactoryFinder find
+WARNING: Using deprecated META-INF/services mechanism with non-standard property: javax.xml.soap.MetaFactory. Property javax.xml.soap.SAAJMetaFactory should be used instead.
+Jan 17, 2020 5:00:00 PM javax.xml.soap.FactoryFinder find
+WARNING: Using deprecated META-INF/services mechanism with non-standard property: javax.xml.soap.MetaFactory. Property javax.xml.soap.SAAJMetaFactory should be used instead.
+</system-err>
   </testcase>
 </testsuite>

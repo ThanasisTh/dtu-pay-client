@@ -17,6 +17,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import java.math.BigDecimal;
+import java.util.*;
 
 public class RestServicePaySteps {
 
@@ -25,6 +26,7 @@ public class RestServicePaySteps {
     String UuidNumber;
     Boolean gotTokens;
     Boolean paymentSuccess;
+    Set<UUID> tokens;
 
     DtuPayUserRepresentation customer;
     DtuPayMerchantRepresentation merchant;
@@ -47,6 +49,7 @@ public class RestServicePaySteps {
         customer.setFirstName("Harry");
         customer.setLastName("Potter");
         customer.setCpr("93024832904209");
+        customer.setUuid(null);
     }
 
     @Before
@@ -84,8 +87,9 @@ public class RestServicePaySteps {
         tokenRequest = new TokenRequest();
         tokenRequest.setCpr(customer.getCpr());
         tokenRequest.setNumber(5);
-        gotTokens = baseUrl.path("request/tokens").request().post(Entity.entity(tokenRequest, MediaType.APPLICATION_JSON), Boolean.class);
-        Assert.assertTrue(gotTokens);
+        tokens = baseUrl.path("request/tokens").request().post(Entity.entity(tokenRequest, MediaType.APPLICATION_JSON), HashSet.class);
+        Assert.assertNotNull(tokens);
+        customer.setUuid(tokens);
     }
 
     @Given("there is a registered merchant that also has a bank account with initial balance {int}")
@@ -109,9 +113,9 @@ public class RestServicePaySteps {
         paymentRequest.setCustomerCpr(customer.getCpr());
         paymentRequest.setMerchantUuid(merchant.getUuid());
         paymentRequest.setDescription("Payment for rare chocolate frog cards, 50 galleons");
-
+        paymentRequest.setUuid(UUID.fromString(customer.StringToken()));
+        Assert.assertNotNull(paymentRequest.getUuid());
         paymentSuccess = baseUrl.path("pay").request().post(Entity.entity(paymentRequest, MediaType.APPLICATION_JSON), Boolean.class);
-
 
     }
 
@@ -129,6 +133,7 @@ public class RestServicePaySteps {
 
     @Given("he doesn't have tokens")
     public void heDoesnTHaveTokens() {
+        customer.deleteAllTokens();
 
     }
 
