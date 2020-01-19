@@ -26,9 +26,9 @@ public class RestServicePaySteps {
     String UuidNumber;
     Boolean gotTokens;
     Boolean paymentSuccess;
-    Set<UUID> tokens;
+    List<UUID> tokens;
 
-    DtuPayUserRepresentation customer;
+    DtuPayCustomerRepresentation customer;
     DtuPayMerchantRepresentation merchant;
     PaymentRequest paymentRequest;
     TokenRequest tokenRequest;
@@ -45,11 +45,10 @@ public class RestServicePaySteps {
 
     @Before
     public void createCustomer(){
-        customer = new DtuPayUserRepresentation();
+        customer = new DtuPayCustomerRepresentation();
         customer.setFirstName("Harry");
         customer.setLastName("Potter");
         customer.setCpr("93024832904209");
-        customer.setUuid(null);
     }
 
     @Before
@@ -78,7 +77,7 @@ public class RestServicePaySteps {
 
     @Given("is registered with dtuPay")
     public void isRegisteredWithDtuPay() {
-        CPRNumber = baseUrl.path("register/customer").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON),String.class);
+        CPRNumber = baseUrl.path("customer/create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON),String.class);
         Assert.assertEquals(customer.getCpr(), CPRNumber);
     }
 
@@ -87,9 +86,9 @@ public class RestServicePaySteps {
         tokenRequest = new TokenRequest();
         tokenRequest.setCpr(customer.getCpr());
         tokenRequest.setNumber(5);
-        tokens = baseUrl.path("request/tokens").request().post(Entity.entity(tokenRequest, MediaType.APPLICATION_JSON), HashSet.class);
+        tokens = baseUrl.path("token/request").request().post(Entity.entity(tokenRequest, MediaType.APPLICATION_JSON), List.class);
         Assert.assertNotNull(tokens);
-        customer.setUuid(tokens);
+        customer.setCustomerTokens(tokens);
     }
 
     @Given("there is a registered merchant that also has a bank account with initial balance {int}")
@@ -102,7 +101,7 @@ public class RestServicePaySteps {
         Assert.assertNotNull(accountID2);
         merchant.setAccount(accountID2);
 
-        UuidNumber = baseUrl.path("register/merchant").request().post(Entity.entity(merchant,MediaType.APPLICATION_JSON),String.class);
+        UuidNumber = baseUrl.path("merchant/create").request().post(Entity.entity(merchant,MediaType.APPLICATION_JSON),String.class);
         Assert.assertEquals(merchant.getUuid(), UuidNumber);
     }
 

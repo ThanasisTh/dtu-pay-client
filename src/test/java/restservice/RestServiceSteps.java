@@ -3,7 +3,7 @@ package restservice;
 
 import dtu.ws.fastmoney.BankService;
 import rest.DtuPayMerchantRepresentation;
-import rest.DtuPayUserRepresentation;
+import rest.DtuPayCustomerRepresentation;
 import rest.PaymentRequest;
 import rest.TokenRequest;
 import io.cucumber.java.en.Given;
@@ -22,7 +22,7 @@ public class RestServiceSteps {  // This is not currently used because RestServi
 
     WebTarget baseUrl;
     String response;
-    DtuPayUserRepresentation customer;
+    DtuPayCustomerRepresentation customer;
     DtuPayMerchantRepresentation merchant;
     PaymentRequest paymentRequest;
     String CPRNumber;
@@ -39,7 +39,7 @@ public class RestServiceSteps {  // This is not currently used because RestServi
 
     @Given("there is a customer in the bank with credentials {string} {string} with cpr number {string} and account id {string}")
     public void thereIsACustomerInTheBankWithCredentialsWithCprNumberAndAccountId(String firstname, String lastname, String cprNumber, String accountID) {
-         customer = new DtuPayUserRepresentation();
+         customer = new DtuPayCustomerRepresentation();
          customer.setFirstName(firstname);
          customer.setLastName(lastname);
          customer.setCpr(cprNumber);
@@ -53,7 +53,7 @@ public class RestServiceSteps {  // This is not currently used because RestServi
 
     @When("We register the customer to dtu pay using the rest service with source path \\/register\\/customer")
     public void weRegisterTheCustomerToDtuPayUsingTheRestServiceWithSourcePathRegisterCustomer() {
-        response = baseUrl.path("register/customer").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON),String.class);
+        response = baseUrl.path("customer/create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON),String.class);
         Assert.assertEquals(CPRNumber, response);
 
 
@@ -76,7 +76,7 @@ public class RestServiceSteps {  // This is not currently used because RestServi
 
     @When("We register the merchant to dtu pay using the rest service with source path \\/register\\/merchant")
     public void weRegisterTheMerchantToDtuPayUsingTheRestServiceWithSourcePathRegisterMerchant() {
-        response = baseUrl.path("register/merchant").request().post(Entity.entity(merchant, MediaType.APPLICATION_JSON),String.class);
+        response = baseUrl.path("merchant/create").request().post(Entity.entity(merchant, MediaType.APPLICATION_JSON),String.class);
         Assert.assertEquals(UuidNumber, response);
     }
 
@@ -86,13 +86,13 @@ public class RestServiceSteps {  // This is not currently used because RestServi
 
     @Given("there is a registered customer in dtuPay with cprNumber {string}")
     public void thereIsARegisteredCustomerInDtuPayWithCprNumber(String cprNumber) {
-        customer = new DtuPayUserRepresentation();
+        customer = new DtuPayCustomerRepresentation();
         customer.setFirstName("name");
         customer.setLastName("navn");
         customer.setCpr(cprNumber);
         customer.setAccount("9201210933");
         CPRNumber = cprNumber;
-        response = baseUrl.path("register/customer").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON),String.class);
+        response = baseUrl.path("customer/create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON),String.class);
         Assert.assertEquals(cprNumber, response);
     }
 
@@ -101,7 +101,7 @@ public class RestServiceSteps {  // This is not currently used because RestServi
         tokenRequest = new TokenRequest();
         tokenRequest.setCpr(CPRNumber);
         tokenRequest.setNumber(numberOfTokens);
-        booleanResponse = baseUrl.path("request/tokens").request().post(Entity.entity(tokenRequest, MediaType.APPLICATION_JSON),Boolean.class);
+        booleanResponse = baseUrl.path("token/request").request().post(Entity.entity(tokenRequest, MediaType.APPLICATION_JSON),Boolean.class);
     }
 
     @Then("we get a confirmation that the system gave him tokens")

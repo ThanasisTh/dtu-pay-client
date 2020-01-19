@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: restservice.CucumberTest
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 5.939 sec <<< FAILURE!
-A customer tries to do a payment(Test the rest service)  Time elapsed: 4.927 sec  <<< ERROR!
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 5.912 sec <<< FAILURE!
+A customer tries to do a payment(Test the rest service)  Time elapsed: 4.965 sec  <<< ERROR!
 java.lang.ClassCastException: java.base/java.lang.String cannot be cast to java.base/java.util.UUID
 	at rest.DtuPayUserRepresentation.StringToken(DtuPayUserRepresentation.java:55)
 	at restservice.RestServicePaySteps.theCustomerTriesToPerformAPaymentWithTheAmountOf(RestServicePaySteps.java:116)

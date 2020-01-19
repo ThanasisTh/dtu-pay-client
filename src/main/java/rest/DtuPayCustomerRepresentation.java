@@ -2,22 +2,22 @@ package rest;
 
 import java.util.*;
 
-public class DtuPayUserRepresentation {
+public class DtuPayCustomerRepresentation {
 	
 	private String cpr;
 	private String firstName;
 	private String lastName;
 	private String account;
 
-	public Set<UUID> getUuid() {
-		return uuid;
+	public List<UUID> getCustomerTokens() {
+		return customerTokens;
 	}
 
-	public void setUuid(Set<UUID> uuid) {
-		this.uuid = uuid;
+	public void setCustomerTokens(List<UUID> customerTokens) {
+		this.customerTokens = customerTokens;
 	}
 
-	private Set<UUID> uuid = new HashSet<>();
+	private List<UUID> customerTokens;
 
 	public String getCpr() {
 		return cpr;
@@ -52,15 +52,15 @@ public class DtuPayUserRepresentation {
 	}
 
 	public String StringToken(){
-		for (UUID token : uuid){
+		for (UUID token : customerTokens){
 			String stringToken = token.toString();
-			uuid.remove(token);
+			customerTokens.remove(token);
 			return stringToken;
 		}
 		return "null";
 	}
 
 	public void deleteAllTokens(){
-		this.uuid = new HashSet<>();
+		this.customerTokens = new ArrayList<>();
 	}
 }
