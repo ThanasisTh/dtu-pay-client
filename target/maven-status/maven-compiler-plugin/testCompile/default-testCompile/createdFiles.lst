@@ -1,3 +1,5 @@
 restservice/CucumberTest.class
-restservice/RestServicePaySteps.class
 restservice/RestServiceSteps.class
+restservice/RestServiceSteps$1.class
+restservice/RestServicePaySteps.class
+restservice/RestServicePaySteps$1.class

@@ -10,13 +10,14 @@ dtu/ws/fastmoney/GetAccounts.class
 dtu/ws/fastmoney/package-info.class
 dtu/ws/fastmoney/BankServiceException.class
 dtu/ws/fastmoney/GetAccountResponse.class
-rest/DtuPayUserRepresentation.class
+rest/helperMethod.class
 dtu/ws/fastmoney/TransferMoneyFromToResponse.class
 dtu/ws/fastmoney/ObjectFactory.class
 dtu/ws/fastmoney/RetireAccount.class
 rest/TokenRequest.class
 rest/PaymentRequest.class
 dtu/ws/fastmoney/GetAccountByCprNumberResponse.class
+rest/DtuPayCustomerRepresentation.class
 dtu/ws/fastmoney/GetAccount.class
 rest/DtuPayMerchantRepresentation.class
 dtu/ws/fastmoney/Account.class

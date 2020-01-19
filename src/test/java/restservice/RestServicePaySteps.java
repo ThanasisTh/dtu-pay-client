@@ -5,17 +5,19 @@ import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.User;
 import rest.*;
 import io.cucumber.java.Before;
+import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.cucumber.java.After;
 import org.junit.Assert;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -26,12 +28,19 @@ public class RestServicePaySteps {
     String UuidNumber;
     Boolean gotTokens;
     Boolean paymentSuccess;
-    List<UUID> tokens;
+    List<UUID> tokenList;
 
     DtuPayCustomerRepresentation customer;
     DtuPayMerchantRepresentation merchant;
     PaymentRequest paymentRequest;
     TokenRequest tokenRequest;
+    helperMethod helper = new helperMethod();
+    Response tokenResponse;
+    Response paymentResponse;
+
+    Response createResponse;
+    Response createMerchantResponse;
+
 
     BankFactory bankFactory;
     BankService bank;
@@ -45,17 +54,13 @@ public class RestServicePaySteps {
 
     @Before
     public void createCustomer(){
-        customer = new DtuPayCustomerRepresentation();
-        customer.setFirstName("Harry");
-        customer.setLastName("Potter");
-        customer.setCpr("93024832904209");
+        customer = new DtuPayCustomerRepresentation("Harry", "Potter", "93024832904209", null);
     }
 
     @Before
     public void createMerchant(){
-        merchant = new DtuPayMerchantRepresentation();
-        merchant.setName("Voldemort");
-        merchant.setUuid("923840932840234");
+        merchant = new DtuPayMerchantRepresentation("voldemort", "923840932840234", null);
+
     }
 
     @Before
@@ -68,27 +73,26 @@ public class RestServicePaySteps {
         User bankUser = new User();
         bankUser.setFirstName(customer.getFirstName());
         bankUser.setLastName(customer.getLastName());
-        bankUser.setCprNumber(customer.getCpr());
+        bankUser.setCprNumber(customer.getCprNumber());
         String accountID = bank.createAccountWithBalance(bankUser, BigDecimal.valueOf(initialBalance));
         Assert.assertNotNull(accountID);
-        customer.setAccount(accountID);
+        customer.setAccountId(accountID);
 
     }
 
     @Given("is registered with dtuPay")
     public void isRegisteredWithDtuPay() {
-        CPRNumber = baseUrl.path("customer/create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON),String.class);
-        Assert.assertEquals(customer.getCpr(), CPRNumber);
+        createResponse = baseUrl.path("customer/create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON));
+        Assert.assertEquals(201, createResponse.getStatus());
     }
 
     @Given("he has valid tokens")
     public void heHasValidTokens() {
-        tokenRequest = new TokenRequest();
-        tokenRequest.setCpr(customer.getCpr());
-        tokenRequest.setNumber(5);
-        tokens = baseUrl.path("token/request").request().post(Entity.entity(tokenRequest, MediaType.APPLICATION_JSON), List.class);
-        Assert.assertNotNull(tokens);
-        customer.setCustomerTokens(tokens);
+        tokenRequest = new TokenRequest(customer.getCprNumber(), 5);
+        tokenResponse = baseUrl.path("token/request").request(MediaType.APPLICATION_JSON).post(Entity.json(tokenRequest), Response.class);
+        Assert.assertEquals(200, tokenResponse.getStatus());
+        tokenList = tokenResponse.readEntity(new GenericType<List<UUID>>(){});
+        customer.setCustomerTokens(tokenList);
     }
 
     @Given("there is a registered merchant that also has a bank account with initial balance {int}")
@@ -101,50 +105,48 @@ public class RestServicePaySteps {
         Assert.assertNotNull(accountID2);
         merchant.setAccount(accountID2);
 
-        UuidNumber = baseUrl.path("merchant/create").request().post(Entity.entity(merchant,MediaType.APPLICATION_JSON),String.class);
-        Assert.assertEquals(merchant.getUuid(), UuidNumber);
+        createMerchantResponse = baseUrl.path("merchant/create").request().post(Entity.entity(merchant,MediaType.APPLICATION_JSON));
+        Assert.assertEquals(201, createMerchantResponse.getStatus());
     }
 
     @When("the customer tries to perform a payment with the amount of {int}")
     public void theCustomerTriesToPerformAPaymentWithTheAmountOf(int amount) {
-        paymentRequest = new PaymentRequest();
-        paymentRequest.setAmount(amount);
-        paymentRequest.setCustomerCpr(customer.getCpr());
-        paymentRequest.setMerchantUuid(merchant.getUuid());
-        paymentRequest.setDescription("Payment for rare chocolate frog cards, 50 galleons");
-        paymentRequest.setUuid(UUID.fromString(customer.StringToken()));
-        Assert.assertNotNull(paymentRequest.getUuid());
-        paymentSuccess = baseUrl.path("pay").request().post(Entity.entity(paymentRequest, MediaType.APPLICATION_JSON), Boolean.class);
+        paymentRequest = new PaymentRequest(amount, merchant.getUuid(),"Payment for rare chocolate frog cards, 50 galleons", customer.getCprNumber(), helper.getOneTokenFromCustomer(customer));
+        //paymentRequest.setUuid(UUID.fromString(customer.getCustomerTokens());
+        paymentResponse = baseUrl.path("payment/pay").request().post(Entity.entity(paymentRequest, MediaType.APPLICATION_JSON));
+
 
     }
 
     @Then("the endpoint api\\/pay will return true")
     public void theEndpointApiPayWillReturnTrue() {
-        Assert.assertTrue(paymentSuccess);
+        Assert.assertEquals(200, paymentResponse.getStatus());
+
     }
 
     @Then("the customer has a balance of {int} and the merchant has a balance of {int}")
     public void theCustomerHasABalanceOfAndTheMerchantHasABalanceOf(int expectedCustomerBalance, int expectedMerchantBalance) throws Exception{
-        Assert.assertEquals(BigDecimal.valueOf(expectedCustomerBalance), bank.getAccountByCprNumber(customer.getCpr()).getBalance());
+        Assert.assertEquals(BigDecimal.valueOf(expectedCustomerBalance), bank.getAccountByCprNumber(customer.getCprNumber()).getBalance());
         Assert.assertEquals(BigDecimal.valueOf(expectedMerchantBalance), bank.getAccountByCprNumber(merchant.getUuid()).getBalance());
 
     }
 
     @Given("he doesn't have tokens")
     public void heDoesnTHaveTokens() {
-        customer.deleteAllTokens();
+       // customer.deleteAllTokens();
 
     }
 
     @Then("the endpoint api\\/pay will return false")
     public void theEndpointApiPayWillReturnFalse() {
-       Assert.assertFalse(paymentSuccess);
+        Assert.assertNotEquals(200, paymentResponse.getStatus());
+
     }
 
-
+//
     @After
     public void deleteFromBank() throws Exception{
-        bank.retireAccount(customer.getAccount());
+        bank.retireAccount(customer.getAccountId());
         bank.retireAccount(merchant.getAccount());
     }
 

@@ -1,21 +1,28 @@
 package rest;
 
 public class TokenRequest {
-	
-	private String cpr;
-	private int number;
-	
-	public String getCpr() {
-		return cpr;
+
+	private String cprNumber;
+	private int requestedTokens;
+
+	public TokenRequest()
+	{
 	}
-	public void setCpr(String cpr) {
-		this.cpr = cpr;
+
+	public TokenRequest(String cprNumber, int requestedTokens)
+	{
+		this.cprNumber = cprNumber;
+		this.requestedTokens = requestedTokens;
 	}
-	public int getNumber() {
-		return number;
+
+	public String getCprNumber()
+	{
+		return cprNumber;
 	}
-	public void setNumber(int number) {
-		this.number = number;
-	} 
+
+	public int getRequestedTokens()
+	{
+		return requestedTokens;
+	}
 
 }

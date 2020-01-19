@@ -2,6 +2,7 @@ package restservice;
 
 
 import dtu.ws.fastmoney.BankService;
+import io.cucumber.java.After;
 import rest.DtuPayMerchantRepresentation;
 import rest.DtuPayCustomerRepresentation;
 import rest.PaymentRequest;
@@ -15,13 +16,18 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 
 public class RestServiceSteps {  // This is not currently used because RestServicePaySteps covers all the cases
 
     WebTarget baseUrl;
-    String response;
+    Response response;
     DtuPayCustomerRepresentation customer;
     DtuPayMerchantRepresentation merchant;
     PaymentRequest paymentRequest;
@@ -30,6 +36,8 @@ public class RestServiceSteps {  // This is not currently used because RestServi
     boolean booleanResponse;
     TokenRequest tokenRequest;
     BankService bankService;
+    List<UUID> tokenList;
+    Response tokenResponse;
 
     public RestServiceSteps() {
         Client client = ClientBuilder.newClient();
@@ -39,11 +47,8 @@ public class RestServiceSteps {  // This is not currently used because RestServi
 
     @Given("there is a customer in the bank with credentials {string} {string} with cpr number {string} and account id {string}")
     public void thereIsACustomerInTheBankWithCredentialsWithCprNumberAndAccountId(String firstname, String lastname, String cprNumber, String accountID) {
-         customer = new DtuPayCustomerRepresentation();
-         customer.setFirstName(firstname);
-         customer.setLastName(lastname);
-         customer.setCpr(cprNumber);
-         customer.setAccount(accountID);
+         customer = new DtuPayCustomerRepresentation("Ron", "Weasly", "cpr82849", "43289048390");
+         customer.setAccountId(accountID);
          CPRNumber = cprNumber;
     }
 
@@ -51,10 +56,10 @@ public class RestServiceSteps {  // This is not currently used because RestServi
     public void allTheCredentialsAreValid() {
     }
 
-    @When("We register the customer to dtu pay using the rest service with source path \\/register\\/customer")
-    public void weRegisterTheCustomerToDtuPayUsingTheRestServiceWithSourcePathRegisterCustomer() {
-        response = baseUrl.path("customer/create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON),String.class);
-        Assert.assertEquals(CPRNumber, response);
+    @When("We register the customer to dtu pay using the rest service with source path customer\\/create")
+    public void weRegisterTheCustomerToDtuPayUsingTheRestServiceWithSourcePathCustomerCreate() {
+        response = baseUrl.path("customer/create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON));
+        Assert.assertEquals(201, response.getStatus());
 
 
     }
@@ -67,17 +72,14 @@ public class RestServiceSteps {  // This is not currently used because RestServi
 
     @Given("there is a merchant in the bank with credentials {string} with uuid number {string} and account id {string}")
     public void thereIsAMerchantInTheBankWithCredentialsWithUuidNumberAndAccountId(String name, String uuid, String account) {
-        merchant = new DtuPayMerchantRepresentation();
-        merchant.setName(name);
-        merchant.setUuid(uuid);
-        merchant.setAccount(account);
+        merchant = new DtuPayMerchantRepresentation(name, uuid, account);
         UuidNumber = uuid;
     }
 
-    @When("We register the merchant to dtu pay using the rest service with source path \\/register\\/merchant")
-    public void weRegisterTheMerchantToDtuPayUsingTheRestServiceWithSourcePathRegisterMerchant() {
-        response = baseUrl.path("merchant/create").request().post(Entity.entity(merchant, MediaType.APPLICATION_JSON),String.class);
-        Assert.assertEquals(UuidNumber, response);
+    @When("We register the merchant to dtu pay using the rest service with source path merchant\\/create")
+    public void weRegisterTheMerchantToDtuPayUsingTheRestServiceWithSourcePathMerchantCreate() {
+        response = baseUrl.path("merchant/create").request().post(Entity.entity(merchant, MediaType.APPLICATION_JSON));
+        Assert.assertEquals(201, response.getStatus());
     }
 
     @Then("we get a confirmation that the merchant was registered")
@@ -86,28 +88,43 @@ public class RestServiceSteps {  // This is not currently used because RestServi
 
     @Given("there is a registered customer in dtuPay with cprNumber {string}")
     public void thereIsARegisteredCustomerInDtuPayWithCprNumber(String cprNumber) {
-        customer = new DtuPayCustomerRepresentation();
-        customer.setFirstName("name");
-        customer.setLastName("navn");
-        customer.setCpr(cprNumber);
-        customer.setAccount("9201210933");
+        customer = new DtuPayCustomerRepresentation("Hermione", "Granger", cprNumber, "409432980428930");
         CPRNumber = cprNumber;
-        response = baseUrl.path("customer/create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON),String.class);
-        Assert.assertEquals(cprNumber, response);
+        response = baseUrl.path("customer/create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON));
+        Assert.assertEquals(201, response.getStatus());
     }
 
     @When("he requests {int} tokens")
     public void heRequestsTokens(int numberOfTokens) {
-        tokenRequest = new TokenRequest();
-        tokenRequest.setCpr(CPRNumber);
-        tokenRequest.setNumber(numberOfTokens);
-        booleanResponse = baseUrl.path("token/request").request().post(Entity.entity(tokenRequest, MediaType.APPLICATION_JSON),Boolean.class);
+        tokenRequest = new TokenRequest(CPRNumber, numberOfTokens);
+
+
+        tokenResponse = baseUrl.path("token/request").request(MediaType.APPLICATION_JSON).post(Entity.json(tokenRequest), Response.class);
+        Assert.assertEquals(200, tokenResponse.getStatus());
+
+        tokenList = tokenResponse.readEntity(new GenericType<List<UUID>>(){});
+        //System.out.println(tokenList);
+
+        //tokenList = baseUrl.path("token/request2").request().post(Entity.entity(tokenRequest, MediaType.APPLICATION_JSON),List.class);
+        Assert.assertNotNull(tokenList);
+        Assert.assertEquals(numberOfTokens, tokenList.size());
+        customer.setCustomerTokens(tokenList);
     }
 
     @Then("we get a confirmation that the system gave him tokens")
     public void weGetAConfirmationThatTheSystemGaveHimTokens() {
-        Assert.assertTrue(booleanResponse);
+
     }
-
-
+//
+//    @After
+//    public void deleteData(){
+//        if (customer != null) {
+//            response = baseUrl.path("customer/delete").queryParam(customer.getCprNumber()).request().get();
+//            Assert.assertEquals(200, response.getStatus());
+//        }
+//        if (merchant != null) {
+//            response = baseUrl.path("merchant/delete").queryParam(merchant.getUuid()).request().get();
+//            Assert.assertEquals(200, response.getStatus());
+//        }
+//    }
 }
