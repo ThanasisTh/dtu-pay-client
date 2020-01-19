@@ -49,7 +49,8 @@ public class RestServicePaySteps {
 
     public RestServicePaySteps() {
         Client client = ClientBuilder.newClient();
-        baseUrl = client.target("http://localhost:8080/api/");
+        //baseUrl = client.target("http://fastmoney-22.compute.dtu.dk:8080/api/");
+        baseUrl = client.target("http://fastmoney-22.compute.dtu.dk:8080/api/");
     }
 
     @Before
@@ -143,7 +144,7 @@ public class RestServicePaySteps {
 
     }
 
-//
+
     @After
     public void deleteFromBank() throws Exception{
         bank.retireAccount(customer.getAccountId());

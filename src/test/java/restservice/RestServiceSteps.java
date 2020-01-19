@@ -26,7 +26,8 @@ import java.util.UUID;
 
 public class RestServiceSteps {  // This is not currently used because RestServicePaySteps covers all the cases
 
-    WebTarget baseUrl;
+    WebTarget baseUrlMonolith;
+    WebTarget baseUrlCustomer;
     Response response;
     DtuPayCustomerRepresentation customer;
     DtuPayMerchantRepresentation merchant;
@@ -41,13 +42,14 @@ public class RestServiceSteps {  // This is not currently used because RestServi
 
     public RestServiceSteps() {
         Client client = ClientBuilder.newClient();
-        baseUrl = client.target("http://localhost:8080/api/");
+        baseUrlMonolith = client.target("http://fastmoney-22.compute.dtu.dk:8080/api/");
+        baseUrlCustomer = client.target("http://fastmoney-22.compute.dtu.dk:8080/api/customer/");
     }
 
 
     @Given("there is a customer in the bank with credentials {string} {string} with cpr number {string} and account id {string}")
     public void thereIsACustomerInTheBankWithCredentialsWithCprNumberAndAccountId(String firstname, String lastname, String cprNumber, String accountID) {
-         customer = new DtuPayCustomerRepresentation("Ron", "Weasly", "cpr82849", "43289048390");
+         customer = new DtuPayCustomerRepresentation("Ron", "Weasly", cprNumber, "43289048390");
          customer.setAccountId(accountID);
          CPRNumber = cprNumber;
     }
@@ -58,7 +60,7 @@ public class RestServiceSteps {  // This is not currently used because RestServi
 
     @When("We register the customer to dtu pay using the rest service with source path customer\\/create")
     public void weRegisterTheCustomerToDtuPayUsingTheRestServiceWithSourcePathCustomerCreate() {
-        response = baseUrl.path("customer/create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON));
+        response = baseUrlCustomer.path("/create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON));
         Assert.assertEquals(201, response.getStatus());
 
 
@@ -78,7 +80,7 @@ public class RestServiceSteps {  // This is not currently used because RestServi
 
     @When("We register the merchant to dtu pay using the rest service with source path merchant\\/create")
     public void weRegisterTheMerchantToDtuPayUsingTheRestServiceWithSourcePathMerchantCreate() {
-        response = baseUrl.path("merchant/create").request().post(Entity.entity(merchant, MediaType.APPLICATION_JSON));
+        response = baseUrlMonolith.path("merchant/create").request().post(Entity.entity(merchant, MediaType.APPLICATION_JSON));
         Assert.assertEquals(201, response.getStatus());
     }
 
@@ -90,7 +92,7 @@ public class RestServiceSteps {  // This is not currently used because RestServi
     public void thereIsARegisteredCustomerInDtuPayWithCprNumber(String cprNumber) {
         customer = new DtuPayCustomerRepresentation("Hermione", "Granger", cprNumber, "409432980428930");
         CPRNumber = cprNumber;
-        response = baseUrl.path("customer/create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON));
+        response = baseUrlCustomer.path("create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON));
         Assert.assertEquals(201, response.getStatus());
     }
 
@@ -99,13 +101,10 @@ public class RestServiceSteps {  // This is not currently used because RestServi
         tokenRequest = new TokenRequest(CPRNumber, numberOfTokens);
 
 
-        tokenResponse = baseUrl.path("token/request").request(MediaType.APPLICATION_JSON).post(Entity.json(tokenRequest), Response.class);
+        tokenResponse = baseUrlMonolith.path("token/request").request(MediaType.APPLICATION_JSON).post(Entity.json(tokenRequest), Response.class);
         Assert.assertEquals(200, tokenResponse.getStatus());
 
         tokenList = tokenResponse.readEntity(new GenericType<List<UUID>>(){});
-        //System.out.println(tokenList);
-
-        //tokenList = baseUrl.path("token/request2").request().post(Entity.entity(tokenRequest, MediaType.APPLICATION_JSON),List.class);
         Assert.assertNotNull(tokenList);
         Assert.assertEquals(numberOfTokens, tokenList.size());
         customer.setCustomerTokens(tokenList);
