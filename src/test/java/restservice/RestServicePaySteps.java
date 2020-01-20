@@ -47,7 +47,7 @@ public class RestServicePaySteps {
 
     String webServer = "http://fastmoney-22.compute.dtu.dk:";
     String localhost = "http://localhost:";
-    String host = localhost;
+    String host = webServer;
 
     String monolithPort = Integer.toString(Config.DTU_PAY_PORT);
     String customerPort = Integer.toString(Config.CUSTOMER_PORT);
@@ -191,16 +191,17 @@ public class RestServicePaySteps {
 
     @After
     public void deleteFromBank() throws Exception{
-        bank.retireAccount(customer.getAccountId());
-        bank.retireAccount(merchant.getAccountId());
+        if (customer.getAccountId() != null){
+            bank.retireAccount(customer.getAccountId());
+            deleteCustomerResponse = baseUrlCustomer.path("delete/"+customer.getCprNumber()).request().get();
+            Assert.assertEquals(200, deleteCustomerResponse.getStatus());
+        }
+        if (merchant.getAccountId() != null) {
+            bank.retireAccount(merchant.getAccountId());
+            deleteMerchantResponse = baseUrlMerchant.path("delete/"+merchant.getUuid()).request().get();
+            Assert.assertEquals(200, deleteMerchantResponse.getStatus());
+        }
     }
 
-    @After
-    public void deleteFromMicroServices() throws Exception{
-        deleteCustomerResponse = baseUrlCustomer.path("delete/"+customer.getCprNumber()).request().get();
-        Assert.assertEquals(200, deleteCustomerResponse.getStatus());
-        deleteMerchantResponse = baseUrlMerchant.path("delete/"+merchant.getUuid()).request().get();
-        Assert.assertEquals(200, deleteMerchantResponse.getStatus());
-    }
 
 }
