@@ -1,11 +1,13 @@
 package rest;
 
+import dtu.DtuPayCustomerRepresentation;
+
 import java.util.UUID;
 
 public class helperMethod {
 
 
-    public UUID getOneTokenFromCustomer(DtuPayCustomerRepresentation customer){
+    public String getOneTokenFromCustomer(DtuPayCustomerRepresentation customer){
         return customer.getCustomerTokens().get(0);
     }
 }
