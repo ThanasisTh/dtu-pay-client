@@ -43,7 +43,7 @@ Feature: Test the rest service
     And he has valid tokens
     And there is a registered merchant that also has a bank account with initial balance 200
     When the customer performs 4 purchases with amounts between 50 and 100
-    And when he asks for reports between yesterday and tomorrow
+    And when he asks for reports between "2020-01-01" and "2020-01-31"
     Then he gets 10 payment objects describing the purchases
 
 

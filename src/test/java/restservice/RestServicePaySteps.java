@@ -30,7 +30,7 @@ public class RestServicePaySteps {
     Boolean gotTokens;
     Boolean paymentSuccess;
     List<UUID> tokenList;
-
+    int numberOfPurchases;
 
     helperMethod helper = new helperMethod();
     Response createResponse;
@@ -74,6 +74,7 @@ public class RestServicePaySteps {
     Response reportResonse;
 
     PaymentRequest paymentRequest;
+    TransactionReport transactionReport;
 
 
     public RestServicePaySteps() {
@@ -215,7 +216,9 @@ public class RestServicePaySteps {
 
     @When("the customer performs {int} purchases with amounts between {int} and {int}")
     public void theCustomerPerformsPurchasesWithAmountsBetweenAnd(int amountOfPurchases, int beginRandom, int stopRandom) {
+        numberOfPurchases = amountOfPurchases;
         paymentRequest = new PaymentRequest(0, merchant.getUuid(), null, customer.getCprNumber(), null);
+
         for (int i = 0; i < amountOfPurchases; i++){
 
             Random r = new Random();
@@ -231,28 +234,26 @@ public class RestServicePaySteps {
         }
     }
 
-    @When("when he asks for reports between yesterday and tomorrow")
-    public void whenHeAsksForReportsBetweenJanuaryAndJanuary(Integer int1, Integer int2, Integer int3, Integer int4) {
-        SimpleDateFormat dateFormatStart = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat dateFormatEnd = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = new Date();
 
-        dateFormatStart.format(date.before(date));
-        dateFormatEnd.format(date.after(date));
-
-        reportRequest = new ReportRequest(dateFormatStart, dateFormatEnd, customer.getCprNumber());
+    @When("when he asks for reports between {string} and {string}")
+    public void whenHeAsksForReportsBetweenAnd(String beginDateString, String endDateString) {
+        Date beginDate = helperMethod.parseDate(beginDateString);
+        Date endDate = helperMethod.parseDate(endDateString);
+        reportRequest = new ReportRequest(beginDate, endDate, customer.getCprNumber());
         reportResonse = baseUrlDtuPay.path("report").request().post(Entity.entity(reportRequest, MediaType.APPLICATION_JSON));
-
 
     }
 
+
     @Then("he gets {int} payment objects describing the purchases")
     public void heGetsPaymentObjectsDescribingThePurchases(Integer int1) {
-       Assert.assertEquals(200, reportResonse);
+        Assert.assertEquals(200, reportResonse.getStatus());
+        transactionReport = reportResonse.readEntity(new GenericType<TransactionReport>(){});
+        Assert.assertEquals(numberOfPurchases, transactionReport.getPayments().size());
     }
 
 
         // 200 ok
         // 201 created
-        // 204
+        // 204 ok but empty
 }
