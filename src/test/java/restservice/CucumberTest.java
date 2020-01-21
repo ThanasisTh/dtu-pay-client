@@ -15,4 +15,11 @@ For example, the class name CucumberTests (Test with an s) will be ignored by Ma
 @RunWith(Cucumber.class)
 @CucumberOptions(features="features", snippets=SnippetType.CAMELCASE)
 public class CucumberTest {
+
+    public static String getHost(){
+        String webServer = "http://fastmoney-22.compute.dtu.dk:";
+        String localhost = "http://localhost:";
+        return localhost;
+    }
+
 }

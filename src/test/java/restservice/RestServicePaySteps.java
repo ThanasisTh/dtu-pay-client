@@ -1,30 +1,25 @@
 package restservice;
 
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+
 import dtu.*;
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.User;
+import io.cucumber.java.af.En;
 import rest.BankFactory;
 import rest.helperMethod;
-import rest.RestApplication;
 import io.cucumber.java.Before;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
-
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.client.*;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class RestServicePaySteps {
@@ -44,10 +39,9 @@ public class RestServicePaySteps {
 
     BankFactory bankFactory;
     BankService bank;
+    ReportRequest reportRequest;
 
-    String webServer = "http://fastmoney-22.compute.dtu.dk:";
-    String localhost = "http://localhost:";
-    String host = webServer;
+
 
     String monolithPort = Integer.toString(Config.DTU_PAY_PORT);
     String customerPort = Integer.toString(Config.CUSTOMER_PORT);
@@ -76,18 +70,20 @@ public class RestServicePaySteps {
     Response deleteCustomerResponse;
     Response deleteMerchantResponse;
     Response verifyTokenResponse;
+    Response refundResponse;
+    Response reportResonse;
 
     PaymentRequest paymentRequest;
 
 
     public RestServicePaySteps() {
         Client client = ClientBuilder.newClient();
+        String host = CucumberTest.getHost();
         baseUrlMonolith = client.target(host + monolithPort + "/api/");
         baseUrlCustomer = client.target(host + customerPort + "/api/customer/");
         baseUrlMerchant = client.target(host + merchantPort + "/api/merchant/");
         baseUrlTokenManager = client.target(host + tokenManagerPort + "/api/token/");
         baseUrlDtuPay = client.target(host + dtuPayPort + "/api/dtupay/");
-        baseUrl = client.target("http://localhost:8081");
     }
 
 
@@ -202,6 +198,61 @@ public class RestServicePaySteps {
             Assert.assertEquals(200, deleteMerchantResponse.getStatus());
         }
     }
+//int amount, String merchantUuid, String description, String customerCpr, String token
+    @When("the customer is granted a refund of {int}")
+    public void theCustomerIsGrantedARefundOf(int amount) {
+        testToken = helper.getOneTokenFromCustomer(customer);
+        Assert.assertNotNull(testToken);
+        paymentRequest = new PaymentRequest(amount, merchant.getUuid(), "This is a refund", customer.getCprNumber(), testToken);
+        paymentResponse = baseUrlDtuPay.path("refund").request().post(Entity.entity(paymentRequest, MediaType.APPLICATION_JSON));
+
+    }
+
+    @Then("the api\\/dtupay\\/refund will return status code ok")
+    public void theApiDtupayRefundWillReturnStatusCodeOk() {
+        Assert.assertEquals(200, paymentResponse.getStatus());
+    }
+
+    @When("the customer performs {int} purchases with amounts between {int} and {int}")
+    public void theCustomerPerformsPurchasesWithAmountsBetweenAnd(int amountOfPurchases, int beginRandom, int stopRandom) {
+        paymentRequest = new PaymentRequest(0, merchant.getUuid(), null, customer.getCprNumber(), null);
+        for (int i = 0; i < amountOfPurchases; i++){
+
+            Random r = new Random();
+            int low = beginRandom;
+            int high = stopRandom;
+            int randomInt= r.nextInt(high-low) + low;
+
+            paymentRequest.setAmount(randomInt);
+            paymentRequest.setDescription("this is purchase nr: " + Integer.toString(i));
+            paymentRequest.setToken(helper.getOneTokenFromCustomer(customer));
+            paymentResponse = baseUrlDtuPay.path("pay").request().post(Entity.entity(paymentRequest, MediaType.APPLICATION_JSON));
+            Assert.assertEquals(200, paymentResponse.getStatus());
+        }
+    }
+
+    @When("when he asks for reports between yesterday and tomorrow")
+    public void whenHeAsksForReportsBetweenJanuaryAndJanuary(Integer int1, Integer int2, Integer int3, Integer int4) {
+        SimpleDateFormat dateFormatStart = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormatEnd = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new Date();
+
+        dateFormatStart.format(date.before(date));
+        dateFormatEnd.format(date.after(date));
+
+        reportRequest = new ReportRequest(dateFormatStart, dateFormatEnd, customer.getCprNumber());
+        reportResonse = baseUrlDtuPay.path("report").request().post(Entity.entity(reportRequest, MediaType.APPLICATION_JSON));
 
 
+    }
+
+    @Then("he gets {int} payment objects describing the purchases")
+    public void heGetsPaymentObjectsDescribingThePurchases(Integer int1) {
+       Assert.assertEquals(200, reportResonse);
+    }
+
+
+        // 200 ok
+        // 201 created
+        // 204
 }

@@ -1,14 +1,11 @@
 package restservice;
 
 import dtu.*;
-import dtu.ws.fastmoney.BankService;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
-import rest.BankFactory;
-import rest.helperMethod;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -27,9 +24,8 @@ public class RestServiceTokenSteps {
     Response requestTokenResponse;
     Response deleteCustomerResponse;
 
-    String webServer = "http://fastmoney-22.compute.dtu.dk:";
-    String localhost = "http://localhost:";
-    String host = localhost;
+
+    String host = CucumberTest.getHost();
 
     String monolithPort = Integer.toString(Config.DTU_PAY_PORT);
     String customerPort = Integer.toString(Config.CUSTOMER_PORT);
@@ -46,7 +42,7 @@ public class RestServiceTokenSteps {
 
     int numberOfTokensRequested;
 
-    DtuPayCustomerRepresentation customer;
+    DtuPayCustomerRepresentation tokenCustomer;
     TokenRequest tokenRequest;
 
 
@@ -58,13 +54,13 @@ public class RestServiceTokenSteps {
         baseUrlTokenManager = client.target(host + tokenManagerPort + "/api/token/");
         baseUrlDtuPay = client.target(host + dtuPayPort + "/api/dtupay/");
         baseUrl = client.target("http://localhost:8081");
-        customer = new DtuPayCustomerRepresentation("Luna", "Lovegood", UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        tokenCustomer = new DtuPayCustomerRepresentation("Luna", "Lovegood", UUID.randomUUID().toString(), UUID.randomUUID().toString());
     }
 
     @After
     public void deleteCustomer(){
-        if (customer.getAccountId() == null){
-        deleteCustomerResponse = baseUrlCustomer.path("delete/"+customer.getCprNumber()).request().get();
+        if (tokenCustomer.getAccountId() == null){
+        deleteCustomerResponse = baseUrlCustomer.path("delete/"+ tokenCustomer.getCprNumber()).request().get();
         Assert.assertEquals(200, deleteCustomerResponse.getStatus());
         }
     }
@@ -73,19 +69,19 @@ public class RestServiceTokenSteps {
 
     @Given("a customer registered in dtuPay")
     public void aCustomerRegisteredInDtuPay() {
-        createCustomerResponse = baseUrlCustomer.path("create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON));
+        createCustomerResponse = baseUrlCustomer.path("create").request().post(Entity.entity(tokenCustomer, MediaType.APPLICATION_JSON));
         Assert.assertEquals(201, createCustomerResponse.getStatus());
     }
 
     @Given("doesnt have any valid tokens")
     public void doesntHaveAnyValidTokens() {
-       Assert.assertNull(customer.getCustomerTokens());
+       Assert.assertNull(tokenCustomer.getCustomerTokens());
     }
 
     @When("the customer asks for {int} tokens")
     public void theCustomerAsksForTokens(int number) {
         numberOfTokensRequested = number;
-        tokenRequest = new TokenRequest(customer.getCprNumber(), numberOfTokensRequested);
+        tokenRequest = new TokenRequest(tokenCustomer.getCprNumber(), numberOfTokensRequested);
         requestTokenResponse = baseUrlTokenManager.path("request").request(MediaType.APPLICATION_JSON).post(Entity.entity(tokenRequest, MediaType.APPLICATION_JSON));
     }
 
@@ -95,8 +91,8 @@ public class RestServiceTokenSteps {
         List<String> tokenList = requestTokenResponse.readEntity(new GenericType<List<String>>(){});
         Assert.assertNotNull(tokenList);
         Assert.assertEquals(numberOfTokensRequested, tokenList.size());
-        customer.setCustomerTokens(tokenList);
-        Assert.assertNotNull(customer.getCustomerTokens());
+        tokenCustomer.setCustomerTokens(tokenList);
+        Assert.assertNotNull(tokenCustomer.getCustomerTokens());
     }
 
     @Then("he will not recieve any tokens")
@@ -106,18 +102,18 @@ public class RestServiceTokenSteps {
 
     @Given("already have {int} tokens")
     public void alreadyHaveTokens(int number) {
-        tokenRequest = new TokenRequest(customer.getCprNumber(), number);
+        tokenRequest = new TokenRequest(tokenCustomer.getCprNumber(), number);
         requestTokenResponse = baseUrlTokenManager.path("request").request(MediaType.APPLICATION_JSON).post(Entity.entity(tokenRequest, MediaType.APPLICATION_JSON));
         Assert.assertEquals(201, requestTokenResponse.getStatus());
         List<String> tokenList = requestTokenResponse.readEntity(new GenericType<List<String>>(){});
         Assert.assertNotNull(tokenList);
-        customer.setCustomerTokens(tokenList);
-        Assert.assertNotNull(customer.getCustomerTokens());
-        Assert.assertEquals(number, customer.getCustomerTokens().size());
+        tokenCustomer.setCustomerTokens(tokenList);
+        Assert.assertNotNull(tokenCustomer.getCustomerTokens());
+        Assert.assertEquals(number, tokenCustomer.getCustomerTokens().size());
     }
 
     @Then("he will have {int} tokens")
     public void heWillHaveTokens(int int1) {
-        Assert.assertEquals(int1, customer.getCustomerTokens().size());
+        Assert.assertEquals(int1, tokenCustomer.getCustomerTokens().size());
     }
 }
