@@ -19,6 +19,10 @@ public class helperMethod {
         return stringToken;
     }
 
+    public int howManyTokens(DtuPayCustomerRepresentation customer){
+        return customer.getCustomerTokens().size();
+    }
+
 
     public static Date parseDate(String date) {
         try {

@@ -44,7 +44,30 @@ Feature: Test the rest service
     And there is a registered merchant that also has a bank account with initial balance 200
     When the customer performs 4 purchases with amounts between 50 and 100
     And when he asks for reports between "2020-01-01" and "2020-01-31"
-    Then he gets 10 payment objects describing the purchases
+    Then he gets 4 payment objects describing the purchases
+    And an ok response (200)
+
+  Scenario: A customer asks for a transcript with dates out of range
+    Given a customer has a bank account with initial balance 1000
+    And is registered with dtuPay
+    And he has valid tokens
+    And there is a registered merchant that also has a bank account with initial balance 200
+    When the customer performs 4 purchases with amounts between 50 and 100
+    And when he asks for reports between "2020-01-25" and "2020-01-31"
+    Then he gets 0 payment objects describing the purchases
+    And gets ok but empty response (204)
+
+
+  Scenario: A customer keeps buying stuff and requests tokens
+    Given a customer has a bank account with initial balance 1000
+    And is registered with dtuPay
+    And he has valid tokens
+    And there is a registered merchant that also has a bank account with initial balance 200
+    When the customer performs 8 purchases with amounts between 10 and 11
+    And requests tokens if needed
+    Then he will be able to do it
+    And the customer has a balance of 920 and the merchant has a balance of 280
+
 
 
 

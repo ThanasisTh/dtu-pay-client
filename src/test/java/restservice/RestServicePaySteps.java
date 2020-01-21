@@ -5,7 +5,6 @@ package restservice;
 import dtu.*;
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.User;
-import io.cucumber.java.af.En;
 import rest.BankFactory;
 import rest.helperMethod;
 import io.cucumber.java.Before;
@@ -19,29 +18,19 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class RestServicePaySteps {
 
 
-    String CPRNumber;
-    String UuidNumber;
-    Boolean gotTokens;
-    Boolean paymentSuccess;
-    List<UUID> tokenList;
     int numberOfPurchases;
 
     helperMethod helper = new helperMethod();
     Response createResponse;
     Response createMerchantResponse;
 
-
-    BankFactory bankFactory;
     BankService bank;
     ReportRequest reportRequest;
-
-
 
     String monolithPort = Integer.toString(Config.DTU_PAY_PORT);
     String customerPort = Integer.toString(Config.CUSTOMER_PORT);
@@ -55,11 +44,8 @@ public class RestServicePaySteps {
     WebTarget baseUrlTokenManager;
     WebTarget baseUrlDtuPay;
 
-    WebTarget baseUrl;
-
     Response paymentResponse;
     Response tokenResponse;
-    String tokenStringResponse;
     String testToken;
 
     DtuPayCustomerRepresentation customer;
@@ -69,9 +55,8 @@ public class RestServicePaySteps {
 
     Response deleteCustomerResponse;
     Response deleteMerchantResponse;
-    Response verifyTokenResponse;
     Response refundResponse;
-    Response reportResonse;
+    Response reportResponse;
 
     PaymentRequest paymentRequest;
     TransactionReport transactionReport;
@@ -119,7 +104,6 @@ public class RestServicePaySteps {
 
     @Given("is registered with dtuPay")
     public void isRegisteredWithDtuPay() {
-        System.out.println(baseUrlCustomer.path("create").toString());
         createResponse = baseUrlCustomer.path("create").request().post(Entity.entity(customer, MediaType.APPLICATION_JSON));
         Assert.assertEquals(201, createResponse.getStatus());
     }
@@ -159,7 +143,6 @@ public class RestServicePaySteps {
         paymentRequest = new PaymentRequest(amount, merchant.getUuid(),"Payment for rare chocolate frog cards, 50 galleons", customer.getCprNumber(), testToken);
         Assert.assertNotNull(paymentRequest);
         paymentResponse = baseUrlDtuPay.path("pay").request().post(Entity.entity(paymentRequest, MediaType.APPLICATION_JSON));
-        System.out.println(baseUrlDtuPay.path("pay").toString());
     }
 
     @Then("the endpoint api\\/pay will return true")
@@ -205,29 +188,30 @@ public class RestServicePaySteps {
         testToken = helper.getOneTokenFromCustomer(customer);
         Assert.assertNotNull(testToken);
         paymentRequest = new PaymentRequest(amount, merchant.getUuid(), "This is a refund", customer.getCprNumber(), testToken);
-        paymentResponse = baseUrlDtuPay.path("refund").request().post(Entity.entity(paymentRequest, MediaType.APPLICATION_JSON));
+        refundResponse = baseUrlDtuPay.path("refund").request().post(Entity.entity(paymentRequest, MediaType.APPLICATION_JSON));
 
     }
 
     @Then("the api\\/dtupay\\/refund will return status code ok")
     public void theApiDtupayRefundWillReturnStatusCodeOk() {
-        Assert.assertEquals(200, paymentResponse.getStatus());
+        Assert.assertEquals(200, refundResponse.getStatus());
     }
 
     @When("the customer performs {int} purchases with amounts between {int} and {int}")
     public void theCustomerPerformsPurchasesWithAmountsBetweenAnd(int amountOfPurchases, int beginRandom, int stopRandom) {
         numberOfPurchases = amountOfPurchases;
         paymentRequest = new PaymentRequest(0, merchant.getUuid(), null, customer.getCprNumber(), null);
-
         for (int i = 0; i < amountOfPurchases; i++){
 
             Random r = new Random();
             int low = beginRandom;
             int high = stopRandom;
             int randomInt= r.nextInt(high-low) + low;
-
             paymentRequest.setAmount(randomInt);
             paymentRequest.setDescription("this is purchase nr: " + Integer.toString(i));
+            if(helper.howManyTokens(customer) == 0){
+                heHasValidTokens();
+            }
             paymentRequest.setToken(helper.getOneTokenFromCustomer(customer));
             paymentResponse = baseUrlDtuPay.path("pay").request().post(Entity.entity(paymentRequest, MediaType.APPLICATION_JSON));
             Assert.assertEquals(200, paymentResponse.getStatus());
@@ -237,23 +221,43 @@ public class RestServicePaySteps {
 
     @When("when he asks for reports between {string} and {string}")
     public void whenHeAsksForReportsBetweenAnd(String beginDateString, String endDateString) {
-        Date beginDate = helperMethod.parseDate(beginDateString);
-        Date endDate = helperMethod.parseDate(endDateString);
-        reportRequest = new ReportRequest(beginDate, endDate, customer.getCprNumber());
-        reportResonse = baseUrlDtuPay.path("report").request().post(Entity.entity(reportRequest, MediaType.APPLICATION_JSON));
+
+        String cpr = customer.getCprNumber();
+        reportRequest = new ReportRequest(beginDateString, endDateString, cpr);
+        reportResponse = baseUrlDtuPay.path("report").request().post(Entity.entity(reportRequest, MediaType.APPLICATION_JSON));
 
     }
-
 
     @Then("he gets {int} payment objects describing the purchases")
-    public void heGetsPaymentObjectsDescribingThePurchases(Integer int1) {
-        Assert.assertEquals(200, reportResonse.getStatus());
-        transactionReport = reportResonse.readEntity(new GenericType<TransactionReport>(){});
-        Assert.assertEquals(numberOfPurchases, transactionReport.getPayments().size());
+    public void heGetsPaymentObjectsDescribingThePurchases(int expectedNumberOfPurchases) {
+
+        transactionReport = reportResponse.readEntity(new GenericType<TransactionReport>(){});
+        if (expectedNumberOfPurchases == 0){
+            Assert.assertNull(transactionReport);
+        }
+        else {
+            Assert.assertEquals(expectedNumberOfPurchases, transactionReport.getNumberOfPayments());
+        }
     }
 
+    @Then("an ok response \\({int})")
+    public void anOkResponse(Integer int1) {
+        Assert.assertEquals(200, reportResponse.getStatus());
+    }
 
-        // 200 ok
-        // 201 created
-        // 204 ok but empty
+    @Then("gets ok but empty response \\({int})")
+    public void getsOkButEmptyResponse(Integer int1) {
+        Assert.assertEquals(204, reportResponse.getStatus());
+    }
+
+    @When("requests tokens if needed")
+    public void requestsTokensIfNeeded() {
+
+    }
+
+    @Then("he will be able to do it")
+    public void heWillBeAbleToDoIt() {
+
+    }
+
 }
