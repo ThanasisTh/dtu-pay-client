@@ -1,6 +1,5 @@
 package restservice;
 
-import dtu.*;
 import dtupay.Config;
 import dtupay.DtuPayCustomerRepresentation;
 import dtupay.TokenRequest;
