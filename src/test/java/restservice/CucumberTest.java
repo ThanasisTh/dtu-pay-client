@@ -19,7 +19,7 @@ public class CucumberTest {
     public static String getHost(){
         String webServer = "http://fastmoney-22.compute.dtu.dk:";
         String localhost = "http://localhost:";
-        return localhost;
+        return webServer;
     }
 
 }
