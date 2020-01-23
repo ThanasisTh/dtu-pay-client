@@ -1,14 +1,11 @@
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/TransferMoneyFromTo.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/rest/RestApplication.java
-/Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/rest/PaymentRequest.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/AccountInfo.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/Account.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/TransferMoneyFromToResponse.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/package-info.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/User.java
-/Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/rest/DtuPayMerchantRepresentation.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/GetAccountsResponse.java
-/Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/rest/TokenRequest.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/BankServiceException_Exception.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/CreateAccountWithBalance.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/BankService.java
@@ -19,7 +16,6 @@
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/GetAccountResponse.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/RetireAccountResponse.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/rest/BankFactory.java
-/Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/rest/DtuPayCustomerRepresentation.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/CreateAccountWithBalanceResponse.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/Transaction.java
 /Users/simonebystadhagen/Desktop/Fag og utveksling/DTUPay/dtu-pay-client/src/main/java/dtu/ws/fastmoney/BankServiceService.java
