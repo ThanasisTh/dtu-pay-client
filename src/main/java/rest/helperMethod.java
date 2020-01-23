@@ -1,6 +1,6 @@
 package rest;
 
-import dtu.DtuPayCustomerRepresentation;
+import dtupay.DtuPayCustomerRepresentation;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

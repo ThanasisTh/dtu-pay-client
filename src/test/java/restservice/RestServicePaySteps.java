@@ -1,10 +1,9 @@
 package restservice;
 
 
-
-import dtu.*;
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.User;
+import dtupay.*;
 import rest.BankFactory;
 import rest.helperMethod;
 import io.cucumber.java.Before;

@@ -1,6 +1,9 @@
 package restservice;
 
 import dtu.*;
+import dtupay.Config;
+import dtupay.DtuPayCustomerRepresentation;
+import dtupay.TokenRequest;
 import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
